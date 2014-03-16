@@ -93,3 +93,8 @@ AUTH_PROFILE_MODULE='latch.UserProfile'
 AUTHENTICATION_BACKENDS = (
     'latch.auth_backend.LatchAuthBackend',
 )
+LOGIN_REDIRECT_URL = '/admin/'
+
+TEMPLATE_DIRS = ( 
+    os.path.join(DJANGO_ROOT, 'latch_demo/templates'),
+)
