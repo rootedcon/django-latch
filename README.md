@@ -29,6 +29,36 @@ Configuration
 - not yet completed
 
 
+In your ``settings.py`` file you need to add the following directives:
+
+    .. code:: Python
+
+    INSTALLED_APPS = (
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+        'latch',
+    )
+
+    # Add auth profile 
+    AUTH_PROFILE_MODULE='latch.UserProfile'
+    
+    # Add the authentication backend
+    AUTHENTICATION_BACKENDS = (
+            'latch.auth_backend.LatchAuthBackend',
+    )
+
+
+TODO
+----
+
+* Add a signal when deleting a user to remove the profile
+* Add the UserProfile management to the admin
+
+
 Bugs and requests
 -----------------
 
@@ -41,6 +71,9 @@ License
 -------
 
 You can use this module under Apache 2.0 license. See LICENSE file for details.
+
+The rights for latch/latch.py belongs to ElevenPaths, more information and updated versionas at:
+https://github.com/ElevenPaths/latch-sdk-python
 
 Author
 ------
