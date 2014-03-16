@@ -31,9 +31,9 @@ Configuration
 
 In your ``settings.py`` file you need to add the following directives:
 
-    ```python
+```python
 
-    INSTALLED_APPS = (
+   INSTALLED_APPS = (
         'django.contrib.admin',
         'django.contrib.auth',
         'django.contrib.contenttypes',
@@ -50,7 +50,7 @@ In your ``settings.py`` file you need to add the following directives:
     AUTHENTICATION_BACKENDS = (
             'latch.auth_backend.LatchAuthBackend',
     )
-    ```
+```
     
 TODO
 ----
