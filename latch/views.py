@@ -86,7 +86,7 @@ def status (request, template_name='latch_status.html'):
                 status.append('Account status: <b>%s</b>' % d.values()[0]['status']) 
                 status.append('Application name: <b>%s</b>'%  d.values()[0]['name'])
         except Exception as e:
-            status.append('Latch connection error: <b>%s</b>' %  e.message  )
+            status.append('Latch connection error: <b>%s</b>' %  e.strerror  )
     print status
     return render_to_response(template_name, { 'status': status }, context_instance=RequestContext(request))
             
