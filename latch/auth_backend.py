@@ -7,15 +7,12 @@ from django.core.exceptions import ValidationError
 
 
 def latch_status(user):
-    if  not LatchSetup.objects.exists():
-    	# Always return on if is not configured.
+    accountID = getLatchAccountId(user)
+    if  not LatchSetup.objects.exists() or not accountID:
+    	# Always return on if is not configured or the user does not have latch configured
     	return 'on'
     l = getLatchInstance()
     # We need to extend the User Config to
-    accountID = getLatchAccountId(user)
-    if not accountID: 
-        # if the user does not have latch configured return on
-        return 'on' 
     data = l.status(accountID)
     d = data.get_data()	
     return d['operations'][getLatchAppId()]['status']
