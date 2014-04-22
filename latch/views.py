@@ -5,14 +5,14 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from .models import LatchSetup, UserProfile
 from .forms import LatchPairForm, LatchUnpairForm
-from .helpers import getLatchInstance, getLatchAccountId, saveUserAccountId, get_or_create_profile
+from .helpers import getLatchInstance, getLatchAccountId, saveUserAccountId, get_or_create_profile, deleteUserAccountId
 # Create your views here.
 
 # TODO:
 # - use a signal 'delete user' to delete the paired apps
 # - add userprofile management to the admin
 # 
-
+    
 @login_required
 def pair (request, template_name='latch_pair.html'):
     if not LatchSetup.objects.exists():
@@ -48,16 +48,19 @@ def unpair (request, template_name='latch_unpair.html'):
     if request.method == 'POST':
         form = LatchUnpairForm(request.POST)
         if form.is_valid():
-            do_unpair(request)
+            return do_unpair(request)
     else:
         form = LatchUnpairForm()
     return render_to_response(template_name, { 'form': form }, context_instance=RequestContext(request))
 
 def do_unpair(request, template_name='latch_unpair.html'):
     try:
-        if getLatchAccountId():
+        accountId = getLatchAccountId(request.user)
+        if getLatchAccountId(request.user):
             lt = getLatchInstance()
-            lt.unpair(getLatchAccountId())
+            lt.unpair(getLatchAccountId(request.user))
+            deleteUserAccountId(accountId)
+            return render_to_response('latch_message.html', { 'message': 'Latch removed from your account', 'alert_type': 'success'}, context_instance=RequestContext(request))
         else:
             return render_to_response('latch_message.html', { 'message': 'Your account is not latched', 'alert_type': 'success'}, context_instance=RequestContext(request))
     except UserProfile.DoesNotExist:
@@ -65,7 +68,7 @@ def do_unpair(request, template_name='latch_unpair.html'):
     except Exception as e:
         return render_to_response('latch_message.html', { 'message': 'Error unpairing the account: %s' % e, 'alert_type': 'danger'}, context_instance=RequestContext(request))
 
-# Ccomment the following line if you want to have public status report
+# Comment the following line if you want to have public status report
 @login_required 
 def status (request, template_name='latch_status.html'):
     status = []
