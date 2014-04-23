@@ -80,7 +80,6 @@ def status (request, template_name='latch_status.html'):
         # Clean this part
         accountId = getLatchAccountId(request.user) 
         if not accountId:
-            accountId = 'Not configured'
             status.append( 'Your account is <b>not latched</b>')
             return render(request, template_name, { 'status': status })
         status.append( 'Your accountId is: <b>%s</b>' % accountId )    
