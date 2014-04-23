@@ -1,6 +1,6 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.conf import settings
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from .models import LatchSetup, UserProfile
@@ -16,10 +16,10 @@ from .helpers import getLatchInstance, getLatchAccountId, saveUserAccountId, get
 @login_required
 def pair (request, template_name='latch_pair.html'):
     if not LatchSetup.objects.exists():
-        return render_to_response('latch_message.html', { 'message': 'Latch is not configured', 'alert_type': 'danger'}, context_instance=RequestContext(request))
+        return render(request, 'latch_message.html', { 'message': 'Latch is not configured', 'alert_type': 'danger'})
     try:
         if getLatchAccountId(request.user) != None:
-            return render_to_response('latch_message.html', { 'message': 'Account is already paired', 'alert_type': 'danger'}, context_instance=RequestContext(request))
+            return render(request, 'latch_message.html', { 'message': 'Account is already paired', 'alert_type': 'danger'})
     except:
            pass
         
@@ -34,14 +34,14 @@ def pair (request, template_name='latch_pair.html'):
                 accountId = lt.pair(form.cleaned_data['latch_pin'])
                 if accountId.get_data().has_key('accountId'):
                     saveUserAccountId(request.user, accountId.get_data()['accountId'])
-                    return render_to_response('latch_message.html', { 'message': 'Account paired with Latch', 'alert_type': 'success'}, context_instance=RequestContext(request))
-                return render_to_response('latch_message.html', { 'message': 'Account not paired with Latch', 'alert_type': 'danger'}, context_instance=RequestContext(request))
+                    return render(request, 'latch_message.html', { 'message': 'Account paired with Latch', 'alert_type': 'success'})
+                return render(request, 'latch_message.html', { 'message': 'Account not paired with Latch', 'alert_type': 'danger'})
             except Exception as e:
-               return render_to_response('latch_message.html', { 'message': 'Error pairing the account: %s' % e, 'alert_type': 'danger'}, context_instance=RequestContext(request))
+               return render(request, 'latch_message.html', { 'message': 'Error pairing the account: %s' % e, 'alert_type': 'danger'})
     else:
         form = LatchPairForm()
     
-    return render_to_response(template_name, { 'form': form }, context_instance=RequestContext(request))
+    return render(request, template_name, { 'form': form })
 
 @login_required
 def unpair (request, template_name='latch_unpair.html'):
@@ -51,7 +51,7 @@ def unpair (request, template_name='latch_unpair.html'):
             return do_unpair(request)
     else:
         form = LatchUnpairForm()
-    return render_to_response(template_name, { 'form': form }, context_instance=RequestContext(request))
+    return render(request, template_name, { 'form': form })
 
 def do_unpair(request, template_name='latch_unpair.html'):
     try:
@@ -60,13 +60,13 @@ def do_unpair(request, template_name='latch_unpair.html'):
             lt = getLatchInstance()
             lt.unpair(getLatchAccountId(request.user))
             deleteUserAccountId(accountId)
-            return render_to_response('latch_message.html', { 'message': 'Latch removed from your account', 'alert_type': 'success'}, context_instance=RequestContext(request))
+            return render(request, 'latch_message.html', { 'message': 'Latch removed from your account', 'alert_type': 'success'})
         else:
-            return render_to_response('latch_message.html', { 'message': 'Your account is not latched', 'alert_type': 'success'}, context_instance=RequestContext(request))
+            return render(request, 'latch_message.html', { 'message': 'Your account is not latched', 'alert_type': 'success'})
     except UserProfile.DoesNotExist:
-        return render_to_response('latch_message.html', { 'message': 'Your account has no profile', 'alert_type': 'danger'}, context_instance=RequestContext(request))
+        return render(request, 'latch_message.html', { 'message': 'Your account has no profile', 'alert_type': 'danger'})
     except Exception as e:
-        return render_to_response('latch_message.html', { 'message': 'Error unpairing the account: %s' % e, 'alert_type': 'danger'}, context_instance=RequestContext(request))
+        return render(request, 'latch_message.html', { 'message': 'Error unpairing the account: %s' % e, 'alert_type': 'danger'})
 
 # Comment the following line if you want to have public status report
 @login_required 
@@ -78,19 +78,20 @@ def status (request, template_name='latch_status.html'):
         status.append('Latch is configured: <b>Yes</b>')
         lt = getLatchInstance()
         # Clean this part
-        appid = getLatchAccountId(request.user) 
-        if not appid or len(appid) == 0:
-            appid = 'Not configured'
-        status.append( 'Your application id is: <b>%s</b>' % appid )
+        accountId = getLatchAccountId(request.user) 
+        if not accountId:
+            accountId = 'Not configured'
+            status.append( 'Your account is <b>not latched</b>')
+            return render(request, template_name, { 'status': status })
+        status.append( 'Your accountId is: <b>%s</b>' % accountId )    
         try:
-            acstatus = lt.status(appid)
+            acstatus = lt.status(accountId)
             if acstatus:        
                 d = acstatus.get_data()['operations']
                 status.append('Account status: <b>%s</b>' % d.values()[0]['status']) 
                 status.append('Application name: <b>%s</b>'%  d.values()[0]['name'])
         except Exception as e:
-            status.append('Latch connection error: <b>%s</b>' %  e.strerror  )
-    print status
-    return render_to_response(template_name, { 'status': status }, context_instance=RequestContext(request))
+            status.append('Latch connection error: <b>%s</b>' %  e  )
+    return render(request, template_name, { 'status': status })
             
         
