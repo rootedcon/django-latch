@@ -32,3 +32,9 @@ def saveUserAccountId(user, accountId):
     profile = get_or_create_profile(user)
     profile.latch_accountId = accountId
     profile.save()
+    
+def deleteUserAccountId(accountId):
+    try:
+        UserProfile.objects.get(latch_accountId = accountId).delete()
+    except UserProfile.DoesNotExist:
+        return None
